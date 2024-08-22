@@ -26,6 +26,8 @@ fn main() {
         }
     }
     fn tokenize(input: &str) {
+        let mut line: i32 = 1;
+        let mut errored : i8 = 0;
         for char in input.chars() {
             match char {
                 '(' => println!("LEFT_PAREN ( null"),
@@ -38,10 +40,18 @@ fn main() {
                 '+' => println!("PLUS + null"),
                 ';' => println!("SEMICOLON ; null"),
                 '*' => println!("STAR * null"),
-                _ => {} // Ignore other characters for now
+                '\n'=> line += 1,
+                _ => {
+                    writeln!(io::stderr(), "[line {}] Error: Unexpected character: {}", line, char).unwrap();
+                    errored = 1;
+                    },
+            
             }
         }
         println!("EOF  null");
+        if errored == 1{
+            std::process::exit(65);
+        }
     }
 }
 
