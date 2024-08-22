@@ -27,31 +27,75 @@ fn main() {
     }
     fn tokenize(input: &str) {
         let mut line: i32 = 1;
-        let mut errored : i8 = 0;
-        for char in input.chars() {
+        let mut errored: i8 = 0;
+        let mut chars = input.chars().peekable();
+    
+        while let Some(&char) = chars.peek() {  // Peek at the next character
             match char {
-                '(' => println!("LEFT_PAREN ( null"),
-                ')' => println!("RIGHT_PAREN ) null"),
-                '{' => println!("LEFT_BRACE {{ null"),
-                '}' => println!("RIGHT_BRACE }} null"),
-                ',' => println!("COMMA , null"),
-                '.' => println!("DOT . null"),
-                '-' => println!("MINUS - null"),
-                '+' => println!("PLUS + null"),
-                ';' => println!("SEMICOLON ; null"),
-                '*' => println!("STAR * null"),
-                '\n'=> line += 1,
+                '(' => {
+                    println!("LEFT_PAREN ( null");
+                    chars.next();  // Move to the next character
+                }
+                ')' => {
+                    println!("RIGHT_PAREN ) null");
+                    chars.next();
+                }
+                '{' => {
+                    println!("LEFT_BRACE {{ null");
+                    chars.next();
+                }
+                '}' => {
+                    println!("RIGHT_BRACE }} null");
+                    chars.next();
+                }
+                ',' => {
+                    println!("COMMA , null");
+                    chars.next();
+                }
+                '.' => {
+                    println!("DOT . null");
+                    chars.next();
+                }
+                '-' => {
+                    println!("MINUS - null");
+                    chars.next();
+                }
+                '+' => {
+                    println!("PLUS + null");
+                    chars.next();
+                }
+                ';' => {
+                    println!("SEMICOLON ; null");
+                    chars.next();
+                }
+                '*' => {
+                    println!("STAR * null");
+                    chars.next();
+                }
+                '=' => {
+                    chars.next();  // Consume the '=' character
+                    // Check if the next character is also '='
+                    if chars.peek() == Some(&'=') {
+                        println!("EQUAL_EQUAL == null");
+                        chars.next();  // Consume the second '=' character
+                    } else {
+                        println!("EQUAL = null");
+                    }
+                }
+                '\n' => {
+                    line += 1;
+                    chars.next();  // Move to the next line
+                }
                 _ => {
                     writeln!(io::stderr(), "[line {}] Error: Unexpected character: {}", line, char).unwrap();
                     errored = 1;
-                    },
-            
+                    chars.next();  // Move past the unexpected character
+                }
             }
         }
         println!("EOF  null");
-        if errored == 1{
+        if errored == 1 {
             std::process::exit(65);
         }
     }
 }
-
