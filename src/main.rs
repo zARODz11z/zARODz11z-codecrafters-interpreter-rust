@@ -92,6 +92,24 @@ fn main() {
                         println!("BANG ! null");
                     }
                 }
+                '<' => {
+                    chars.next(); //consume the <
+                    if chars.peek() == Some(&'=') {
+                        println!("LESS_EQUAL <= null");
+                        chars.next();
+                    } else {
+                        println!("LESS < null");
+                    }
+                },
+                '>' => {
+                    chars.next(); //consume the >
+                    if chars.peek() == Some(&'=') {
+                        println!("GREATER_EQUAL >= null");
+                        chars.next();
+                    } else {
+                        println!("GREATER > null");
+                    }
+                },
                 '\n' => {
                     line += 1;
                     chars.next();  // Move to the next line
