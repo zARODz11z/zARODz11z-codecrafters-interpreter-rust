@@ -110,6 +110,14 @@ fn main() {
                         println!("GREATER > null");
                     }
                 },
+                '/' => {
+                    chars.next(); //consume the /
+                    if chars.peek() == Some(&'/') {
+                        break;
+                    } else {
+                        println!("SLASH / null");
+                    }
+                },
                 '\n' => {
                     line += 1;
                     chars.next();  // Move to the next line
