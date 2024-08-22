@@ -82,6 +82,16 @@ fn main() {
                         println!("EQUAL = null");
                     }
                 }
+                '!' => {
+                    chars.next(); //Consume the '!' char
+                    // Check if the next character is '='
+                    if chars.peek() == Some(&'=') {
+                        println!("BANG_EQUAL != null");
+                        chars.next(); // Consume the = in case of '!='
+                    } else {
+                        println!("BANG ! null");
+                    }
+                }
                 '\n' => {
                     line += 1;
                     chars.next();  // Move to the next line
