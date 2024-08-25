@@ -121,6 +121,12 @@ fn main() {
                 '\n' => {
                     line += 1;
                     chars.next();  // Move to the next line
+                },
+                ' ' => {
+                    chars.next();
+                },
+                '\t' => {
+                    chars.next();
                 }
                 _ => {
                     writeln!(io::stderr(), "[line {}] Error: Unexpected character: {}", line, char).unwrap();
