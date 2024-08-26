@@ -12,7 +12,6 @@ fn main() {
     let filename = &args[2];
     match command.as_str() {
         "tokenize" => {
-            // You can use print statements as follows for debugging, they'll be visible when running tests.
             writeln!(io::stderr(), "Logs from your program will appear here!").unwrap();
             let file_contents = fs::read_to_string(filename).unwrap_or_else(|_| {
                 writeln!(io::stderr(), "Failed to read file {}", filename).unwrap();
@@ -33,114 +32,34 @@ fn tokenize(input: &str) {
     let mut errored: i8 = 0;
     let mut chars = input.chars().peekable();
 
-    while let Some(&char) = chars.peek() {  // Peek at the next character
+    while let Some(&char) = chars.peek() {
         match char {
-            '(' => {
-                println!("LEFT_PAREN ( null");
-                chars.next();  // Move to the next character
-            }
-            ')' => {
-                println!("RIGHT_PAREN ) null");
+            '(' | ')' | '{' | '}' | ',' | '.' | '-' | '+' | ';' | '*' => {
+                print_simple_token(char);
                 chars.next();
             }
-            '{' => {
-                println!("LEFT_BRACE {{ null");
-                chars.next();
-            }
-            '}' => {
-                println!("RIGHT_BRACE }} null");
-                chars.next();
-            }
-            ',' => {
-                println!("COMMA , null");
-                chars.next();
-            }
-            '.' => {
-                println!("DOT . null");
-                chars.next();
-            }
-            '-' => {
-                println!("MINUS - null");
-                chars.next();
-            }
-            '+' => {
-                println!("PLUS + null");
-                chars.next();
-            }
-            ';' => {
-                println!("SEMICOLON ; null");
-                chars.next();
-            }
-            '*' => {
-                println!("STAR * null");
-                chars.next();
-            }
-            '=' => {
-                chars.next();  // Consume the '=' character
-                // Check if the next character is also '='
-                if chars.peek() == Some(&'=') {
-                    println!("EQUAL_EQUAL == null");
-                    chars.next();  // Consume the second '=' character
-                } else {
-                    println!("EQUAL = null");
-                }
-            }
-            '!' => {
-                chars.next(); //Consume the '!' char
-                // Check if the next character is '='
-                if chars.peek() == Some(&'=') {
-                    println!("BANG_EQUAL != null");
-                    chars.next(); // Consume the = in case of '!='
-                } else {
-                    println!("BANG ! null");
-                }
-            }
-            '<' => {
-                chars.next(); //consume the <
-                if chars.peek() == Some(&'=') {
-                    println!("LESS_EQUAL <= null");
-                    chars.next();
-                } else {
-                    println!("LESS < null");
-                }
-            }
-            '>' => {
-                chars.next(); //consume the >
-                if chars.peek() == Some(&'=') {
-                    println!("GREATER_EQUAL >= null");
-                    chars.next();
-                } else {
-                    println!("GREATER > null");
-                }
+            '=' | '!' | '<' | '>' => {
+                print_complex_token(char, &mut chars);
             }
             '/' => {
-                chars.next(); //consume the /
-                if chars.peek() == Some(&'/') {
-                    // Skip until end of the line (newline or EOF)
-                    while let Some(&next_char) = chars.peek() {
-                        if next_char == '\n' {
-                            break;
-                        }
-                        chars.next();
-                    }
-                } else {
-                    println!("SLASH / null");
+                handle_slash(&mut chars);
+            }
+            '"' => {
+                if let Err(_) = handle_string_literal(&mut chars, &mut line) {
+                    errored = 1;
                 }
             }
             '\n' => {
                 line += 1;
-                chars.next();  // Move to the next line
-            }
-            ' ' => {
                 chars.next();
             }
-            '\t' => {
+            ' ' | '\t' => {
                 chars.next();
             }
             _ => {
                 writeln!(io::stderr(), "[line {}] Error: Unexpected character: {}", line, char).unwrap();
                 errored = 1;
-                chars.next();  // Move past the unexpected character
+                chars.next();
             }
         }
     }
@@ -148,4 +67,103 @@ fn tokenize(input: &str) {
     if errored == 1 {
         std::process::exit(65);
     }
+}
+
+fn print_simple_token(char: char) {
+    let token_type = match char {
+        '(' => "LEFT_PAREN",
+        ')' => "RIGHT_PAREN",
+        '{' => "LEFT_BRACE",
+        '}' => "RIGHT_BRACE",
+        ',' => "COMMA",
+        '.' => "DOT",
+        '-' => "MINUS",
+        '+' => "PLUS",
+        ';' => "SEMICOLON",
+        '*' => "STAR",
+        _ => unreachable!(),
+    };
+    println!("{} {} null", token_type, char);
+}
+
+fn print_complex_token(char: char, chars: &mut std::iter::Peekable<std::str::Chars>) {
+    match char {
+        '=' => {
+            chars.next(); // Consume the '=' char
+            if chars.peek() == Some(&'=') {
+                println!("EQUAL_EQUAL == null");
+                chars.next(); // Consume the '=' in case of '=='
+            } else {
+                println!("EQUAL = null");
+            }
+        }
+        '!' => {
+            chars.next(); // Consume the '!' char
+            if chars.peek() == Some(&'=') {
+                println!("BANG_EQUAL != null");
+                chars.next(); // Consume the '=' in case of '!='
+            } else {
+                println!("BANG ! null");
+            }
+        }
+        '<' => {
+            chars.next(); // Consume the '<' char
+            if chars.peek() == Some(&'=') {
+                println!("LESS_EQUAL <= null");
+                chars.next(); // Consume the '=' in case of '<='
+            } else {
+                println!("LESS < null");
+            }
+        }
+        '>' => {
+            chars.next(); // Consume the '>' char
+            if chars.peek() == Some(&'=') {
+                println!("GREATER_EQUAL >= null");
+                chars.next(); // Consume the '=' in case of '>='
+            } else {
+                println!("GREATER > null");
+            }
+        }
+        _ => unreachable!(),
+    };
+}
+
+
+fn handle_slash(chars: &mut std::iter::Peekable<std::str::Chars>) {
+    chars.next();
+    if chars.peek() == Some(&'/') {
+        while let Some(&next_char) = chars.peek() {
+            if next_char == '\n' {
+                break;
+            }
+            chars.next();
+        }
+    } else {
+        println!("SLASH / null");
+    }
+}
+
+fn handle_string_literal(chars: &mut std::iter::Peekable<std::str::Chars>, line: &mut i32) -> Result<(), ()> {
+    let mut value = String::new();
+    chars.next(); // Consume the opening quote
+
+    while let Some(&char) = chars.peek() {
+        if char == '"' {
+            break;
+        }
+        if char == '\n' {
+            *line += 1;
+        }
+        value.push(char);
+        chars.next();
+    }
+
+    if chars.peek() != Some(&'"') {
+        writeln!(io::stderr(), "[line {}] Error: Unterminated string.", line).unwrap();
+        return Err(());
+    }
+
+    chars.next(); // Consume the closing quote
+    println!("STRING \"{}\" {}", value, value);
+    Ok(())
 }
