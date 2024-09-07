@@ -49,6 +49,9 @@ fn tokenize(input: &str) {
                     errored = 1;
                 }
             }
+            '0'..='9' => {
+                handle_number(&mut chars);
+            }
             '\n' => {
                 line += 1;
                 chars.next();
@@ -142,6 +145,50 @@ fn handle_slash(chars: &mut std::iter::Peekable<std::str::Chars>) {
         println!("SLASH / null");
     }
 }
+
+fn handle_number(chars: &mut std::iter::Peekable<std::str::Chars>) {
+    let mut number = String::new();
+
+    // Consume the digits before the decimal point
+    while let Some(&char) = chars.peek() {
+        if char.is_digit(10) {
+            number.push(char);
+            chars.next();
+        } else {
+            break;
+        }
+    }
+
+    // Check for a decimal point followed by more digits
+    let mut is_float = false;  // Track if it's a floating-point number
+    if let Some(&'.') = chars.peek() {
+        is_float = true;
+        number.push('.');
+        chars.next(); // Consume the decimal point
+
+        while let Some(&char) = chars.peek() {
+            if char.is_digit(10) {
+                number.push(char);
+                chars.next();
+            } else {
+                break;
+            }
+        }
+    }
+    
+    // Parse the number as a floating-point (f64) regardless of whether it's an integer or float
+    let literal_value: f64 = number.parse().unwrap();
+
+    // Print the number, always printing the literal value as a floating-point
+    if is_float {
+        // If it's a float, print the exact float value
+        println!("NUMBER {} {}", number, literal_value);
+    } else {
+        // If it's an integer, still print as a float but ensure ".0"
+        println!("NUMBER {} {}.0", number, literal_value);
+    }
+}
+
 
 fn handle_string_literal(chars: &mut std::iter::Peekable<std::str::Chars>, line: &mut i32) -> Result<(), ()> {
     let mut value = String::new();
