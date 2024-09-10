@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::io::{self, Write};
+use std::collections::HashMap;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -151,6 +152,23 @@ fn handle_slash(chars: &mut std::iter::Peekable<std::str::Chars>) {
 
 fn handle_identifier(chars: &mut std::iter::Peekable<std::str::Chars>) {
     let mut identifier = String::new();
+    let mut reserved_words = HashMap::new();
+    reserved_words.insert("and", "AND");
+    reserved_words.insert("class", "CLASS");
+    reserved_words.insert("else", "ELSE");
+    reserved_words.insert("false", "FALSE");
+    reserved_words.insert("for", "FOR");
+    reserved_words.insert("fun", "FUN");
+    reserved_words.insert("if", "IF");
+    reserved_words.insert("nil", "NIL");
+    reserved_words.insert("or", "OR");
+    reserved_words.insert("print", "PRINT");
+    reserved_words.insert("return", "RETURN");
+    reserved_words.insert("super", "SUPER");
+    reserved_words.insert("this", "THIS");
+    reserved_words.insert("true", "TRUE");
+    reserved_words.insert("var", "VAR");
+    reserved_words.insert("while", "WHILE");
 
     // Consume the characters before a space ' '
     while let Some(&char) = chars.peek() {
@@ -162,7 +180,12 @@ fn handle_identifier(chars: &mut std::iter::Peekable<std::str::Chars>) {
         }
     }
 
-    println!("IDENTIFIER {} null", identifier);
+    // Check if the identifier is a reserved word
+    if let Some(token_type) = reserved_words.get(identifier.as_str()) {
+        println!("{} {} null", token_type, identifier);
+    } else {
+        println!("IDENTIFIER {} null", identifier);
+    }
 }
 
 fn handle_number(chars: &mut std::iter::Peekable<std::str::Chars>) {
