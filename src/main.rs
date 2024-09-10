@@ -59,7 +59,10 @@ fn tokenize(input: &str) {
             ' ' | '\t' => {
                 chars.next();
             }
-            _ => {
+            'a'..='z' | 'A'..='Z' | '_' => {
+                handle_identifier(&mut chars);
+
+            } _ => {
                 writeln!(io::stderr(), "[line {}] Error: Unexpected character: {}", line, char).unwrap();
                 errored = 1;
                 chars.next();
@@ -146,6 +149,22 @@ fn handle_slash(chars: &mut std::iter::Peekable<std::str::Chars>) {
     }
 }
 
+fn handle_identifier(chars: &mut std::iter::Peekable<std::str::Chars>) {
+    let mut identifier = String::new();
+
+    // Consume the characters before a space ' '
+    while let Some(&char) = chars.peek() {
+        if char.is_alphanumeric() || char == '_' {
+            identifier.push(char);
+            chars.next();
+        } else {
+            break;
+        }
+    }
+
+    println!("IDENTIFIER {} null", identifier);
+}
+
 fn handle_number(chars: &mut std::iter::Peekable<std::str::Chars>) {
     let mut number = String::new();
 
@@ -182,10 +201,10 @@ fn handle_number(chars: &mut std::iter::Peekable<std::str::Chars>) {
     // Print the number, always printing the literal value as a floating-point
     if is_float {
         // If it's a float, print the exact float value
-        println!("NUMBER {} {}", number, literal_value);
+        println!("NUMBER {} {:.1}", number, literal_value);
     } else {
         // If it's an integer, still print as a float but ensure ".0"
-        println!("NUMBER {} {}.0", number, literal_value);
+        println!("NUMBER {} {:.1}", number, literal_value);
     }
 }
 
