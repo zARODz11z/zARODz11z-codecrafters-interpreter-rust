@@ -179,9 +179,7 @@ fn handle_number(chars: &mut std::iter::Peekable<std::str::Chars>) {
     }
 
     // Check for a decimal point followed by more digits
-    let mut is_float = false;  // Track if it's a floating-point number
     if let Some(&'.') = chars.peek() {
-        is_float = true;
         number.push('.');
         chars.next(); // Consume the decimal point
 
@@ -199,12 +197,12 @@ fn handle_number(chars: &mut std::iter::Peekable<std::str::Chars>) {
     let literal_value: f64 = number.parse().unwrap();
 
     // Print the number, always printing the literal value as a floating-point
-    if is_float {
-        // If it's a float, print the exact float value
+    if literal_value.fract() == 0.0 {
+        // If it's an integer, print as an integer i.e. 2.0
         println!("NUMBER {} {:.1}", number, literal_value);
     } else {
-        // If it's an integer, still print as a float but ensure ".0"
-        println!("NUMBER {} {:.1}", number, literal_value);
+        // If it's an float, print exact percision
+        println!("NUMBER {} {}", number, literal_value);
     }
 }
 
